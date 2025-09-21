@@ -1,0 +1,34 @@
+/* Tasks.jsx Start */
+@media (min-width: 769px) {
+  .task-dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+  }
+}
+.custom-checkbox input[type="checkbox"] {
+  accent-color: #198754; /* Bootstrap green */
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.custom-checkbox input[type="checkbox"]:checked {
+  accent-color: #fd7e14; /* Example orange when checked */
+}
+
+/* Tasks.jsx End */
+
+/* Theme changer */
+/* default light theme */
+/* .theme-light {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+} */
+
+/* dark theme */
+.theme-dark {
+  background-color: #1e1e1e !important;
+  color: #f5f5f5 !important;
+}
+
+/* Theme changer */

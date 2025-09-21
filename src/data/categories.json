@@ -1,0 +1,27 @@
+[
+    {
+        "id": "1",
+        "name": "Personal",
+        "color": "#6f42c1"
+    },
+    {
+        "id": "2",
+        "name": "Work",
+        "color": "#198754"
+    },
+    {
+        "id": "3",
+        "name": "Shopping",
+        "color": "#fd7e14"
+    },
+    {
+        "id": "4",
+        "name": "Fitness",
+        "color": "#dc3545"
+    },
+    {
+        "id": "5",
+        "name": "Health",
+        "color": "#0dcaf0"
+    }
+]

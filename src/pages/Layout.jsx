@@ -8,6 +8,7 @@ import { FaBell, FaPlus } from 'react-icons/fa';
 import AddTaskModal from '../components/AddTaskModal';
 import { useQuery } from '@tanstack/react-query';
 import { getProfile, getProfileImage } from "../services/profileService";
+import dummyProfile from '../assets/images/dummy-profile.jpg';
 
 function Layout({ theme, setTheme }) {
 
@@ -22,7 +23,7 @@ function Layout({ theme, setTheme }) {
     });
 
     const userName = profile?.firstName || "User";
-    const userImage = profileImage || "src/assets/images/dummy-profile.jpg";
+    const userImage = profileImage || dummyProfile;
 
     const [show, setShow] = React.useState(false);
 

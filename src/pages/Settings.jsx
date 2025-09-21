@@ -8,6 +8,7 @@ import {
     saveProfileImage,
     deleteProfileImage,
 } from "../services/profileService";
+import dummyProfile from '../assets/images/dummy-profile.jpg';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState("personal");
@@ -107,7 +108,7 @@ const Settings = () => {
                                     <div className="d-flex align-items-center mb-4">
                                         <div className="me-3">
                                             <img
-                                                src={profileImage || "src/assets/images/dummy-profile.jpg"}
+                                                src={profileImage || dummyProfile}
                                                 alt="Profile"
                                                 style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover" }}
                                             />

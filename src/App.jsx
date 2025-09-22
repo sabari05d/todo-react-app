@@ -6,6 +6,8 @@ import Tasks from './pages/Tasks'
 import Settings from './pages/Settings'
 import { useQuery } from '@tanstack/react-query'
 import { getProfile } from './services/profileService'
+import { getTasks } from './services/taskService'
+import TaskReminder from './components/TaskReminder'
 
 const App = () => {
   const [theme, setTheme] = useState("Light");
@@ -36,6 +38,12 @@ const App = () => {
     document.body.className = theme === "Dark" ? "theme-dark" : "theme-light";
   }, [theme]);
 
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: getTasks,
+  });
+
+
   return (
     <>
       <BrowserRouter>
@@ -48,6 +56,9 @@ const App = () => {
             <Route path="settings" element={<Settings theme={theme} setTheme={setTheme} />} />
           </Route>
         </Routes>
+        {/* Global Reminder */}
+        <TaskReminder tasks={tasks} />
+
       </BrowserRouter>
     </>
   )

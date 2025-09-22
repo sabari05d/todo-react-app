@@ -93,9 +93,9 @@ function Layout({ theme, setTheme }) {
                         <div className="ms-auto d-flex align-items-center">
 
                             {/* Bell Icon */}
-                            <span className="me-4 text-secondary">
+                            {/* <span className="me-4 text-secondary">
                                 <FaBell />
-                            </span>
+                            </span> */}
 
                             {/* Avatar */}
                             <img
@@ -162,8 +162,7 @@ function Layout({ theme, setTheme }) {
             {/* Add Task Modal */}
             < AddTaskModal
                 show={showTaskModal}
-                handleClose={() => setShowTaskModal(false)
-                }
+                handleClose={() => setShowTaskModal(false)}
                 handleSave={handleSaveTask}
             />
         </>

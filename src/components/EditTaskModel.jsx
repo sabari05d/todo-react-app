@@ -63,6 +63,7 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                             value={form.dueDate || ""}
                             onChange={handleChange}
                             required
+                            min={new Date().toISOString().split("T")[0]}
                         />
                     </Form.Group>
 

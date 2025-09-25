@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Badge, Card, Dropdown, Row, Col, Form } from "react-bootstrap";
 import categoriesData from "../data/categories.json";
 import { FaCheckCircle, FaClock, FaRegCircle } from "react-icons/fa";
@@ -6,12 +6,27 @@ import { BsThreeDots } from "react-icons/bs";
 import EditTaskModal from "../components/EditTaskModel";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTasks, addTask, updateTask, deleteTask } from "../services/taskService";
+import { IoCalendarNumber } from "react-icons/io5";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+
 
 // Colors for status
 const statusColors = {
     pending: "warning",
     finished: "success",
 };
+
+const CalendarButton = forwardRef(({ onClick }, ref) => (
+    <div
+        className="bg-white shadow p-2 px-3 rounded cursor d-flex align-items-center"
+        onClick={onClick}  // DatePicker opens when this is clicked
+        ref={ref}
+    >
+        <IoCalendarNumber className="fs-5 me-2" />
+        <span>Calendar</span>
+    </div>
+));
 
 const Tasks = () => {
     const queryClient = useQueryClient();
@@ -22,6 +37,8 @@ const Tasks = () => {
     const [showEdit, setShowEdit] = React.useState(false);
     const [currentTask, setCurrentTask] = React.useState(null);
     const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+
+    const [showPicker, setShowPicker] = React.useState(false);
 
     // Handle mobile/desktop range
     React.useEffect(() => {
@@ -69,14 +86,12 @@ const Tasks = () => {
         let arr = [];
         const range = isMobile ? 2 : 4;
         for (let i = -range; i <= range; i++) {
-            let d = new Date();
+            let d = new Date(selectedDate);
             d.setDate(selectedDate.getDate() + i);
             arr.push(d);
         }
         return arr;
     };
-
-
 
     // Helpers
     const getCategory = (id) => categories.find((c) => c.id === id.toString());
@@ -106,14 +121,29 @@ const Tasks = () => {
 
     return (
         <div className="">
+            <div className="d-flex">
+                <div className="justify-content-end">
+                    <div className="text-end mb-3" style={{cursor: 'pointer'}}>
+                        <DatePicker
+                            selected={selectedDate}
+                            onChange={(date) => setSelectedDate(date)}
+                            customInput={<CalendarButton />}  // our trigger
+                            withPortal
+                            onClickOutside={() => { }} // optional: can handle outside clicks
+                        />
+                    </div>
+                </div>
+            </div>
+
+
             {/* Date Navigation */}
-            <div className="d-flex justify-content-between mb-3">
+            <div className="d-flex justify-content-between mt-1 mb-3">
                 {getDates().map((d, i) => (
                     <div
                         key={i}
-                        className={`px-3 mx-1 py-2 rounded text-center ${d.toDateString() === selectedDate.toDateString()
+                        className={`px-3 mx-1 py-2 rounded text-center border shadow ${d.toDateString() === selectedDate.toDateString()
                             ? "bg-primary text-white"
-                            : "bg-light"
+                            : "bg-white"
                             }`}
                         style={{ cursor: "pointer" }}
                         onClick={() => setSelectedDate(d)}

@@ -15,6 +15,12 @@ export const addTask = async (task) => {
 
 export const updateTask = async (updatedTask) => {
     let tasks = await getTasks();
+
+    // If the task is marked finished and completedAt
+    if (updatedTask.status === "finished" && !updatedTask.completedAt) {
+        updatedTask.completedAt = new Date().toISOString(); // set current timestamp
+    }
+
     tasks = tasks.map((t) => (t.id === updatedTask.id ? updatedTask : t));
     localStorage.setItem("tasks", JSON.stringify(tasks));
     return updatedTask;
@@ -25,4 +31,10 @@ export const deleteTask = async (id) => {
     tasks = tasks.filter((t) => t.id !== id);
     localStorage.setItem("tasks", JSON.stringify(tasks));
     return id;
+};
+
+// New function to clear all tasks
+export const clearAllTasks = async () => {
+    localStorage.removeItem(STORAGE_KEY);
+    return true;
 };

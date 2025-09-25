@@ -70,6 +70,7 @@ function Layout({ theme, setTheme }) {
                     <Nav className="flex-column p-2 ">
                         <Nav.Link as={Link} onClick={handleClose} to="/dashboard">Dashboard</Nav.Link>
                         <Nav.Link as={Link} onClick={handleClose} to="/tasks">Tasks</Nav.Link>
+                        <Nav.Link as={Link} onClick={handleClose} to="/reports">Reports</Nav.Link>
                         <Nav.Link as={Link} onClick={handleClose} to="/settings">Settings</Nav.Link>
                     </Nav>
                 </div>
@@ -77,7 +78,7 @@ function Layout({ theme, setTheme }) {
                 {/* Main Content wrapper */}
                 <div className={`flex-grow-1 w-100 min-vh-100 ${theme === "Dark" ? "theme-dark" : "theme-light"}`} style={{ marginLeft: "0", backgroundColor: '#f8f9fc' }}>
                     {/* Navbar */}
-                    <Navbar bg={theme === "Dark" ? "dark" : "white"} expand={false} className="shadow-sm px-3">
+                    <Navbar bg={theme === "Dark" ? "dark" : "white"} expand={false} className="shadow-sm px-3 fixed-top">
                         <span role="button" tabIndex="0"
                             className="d-md-none p-2 fs-5"
                             onClick={handleShow}
@@ -90,29 +91,31 @@ function Layout({ theme, setTheme }) {
                             </span>
                         </Navbar.Brand>
                         {/* User Info */}
-                        <div className="ms-auto d-flex align-items-center">
+                        <Nav.Link as={Link} onClick={handleClose} to="/settings">
+                            <div className="ms-auto d-flex align-items-center">
 
-                            {/* Bell Icon */}
-                            {/* <span className="me-4 text-secondary">
+                                {/* Bell Icon */}
+                                {/* <span className="me-4 text-secondary">
                                 <FaBell />
                             </span> */}
 
-                            {/* Avatar */}
-                            <img
-                                src={userImage}
-                                alt="User Avatar"
-                                style={{
-                                    width: "35px",
-                                    height: "35px",
-                                    borderRadius: "50%",
-                                    objectFit: "cover",
-                                    marginRight: "8px",
-                                }}
-                            />
+                                {/* Avatar */}
+                                <img
+                                    src={userImage}
+                                    alt="User Avatar"
+                                    style={{
+                                        width: "35px",
+                                        height: "35px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        marginRight: "8px",
+                                    }}
+                                />
 
-                            {/* Name (hidden on small screens, shown on md+) */}
-                            <span className="text-muted d-none d-md-inline">{userName}</span>
-                        </div>
+                                {/* Name (hidden on small screens, shown on md+) */}
+                                <span className="text-muted d-none d-md-inline">{userName}</span>
+                            </div>
+                        </Nav.Link>
                     </Navbar>
 
                     {/* Offcanvas Sidebar for mobile */}
@@ -126,6 +129,7 @@ function Layout({ theme, setTheme }) {
                             <Nav className="flex-column">
                                 <Nav.Link as={Link} onClick={handleClose} to="/dashboard">Dashboard</Nav.Link>
                                 <Nav.Link as={Link} onClick={handleClose} to="/tasks">Tasks</Nav.Link>
+                                <Nav.Link as={Link} onClick={handleClose} to="/reports">Reports</Nav.Link>
                                 <Nav.Link as={Link} onClick={handleClose} to="/settings">Settings</Nav.Link>
                             </Nav>
                         </Offcanvas.Body>
@@ -137,6 +141,7 @@ function Layout({ theme, setTheme }) {
                         style={{
                             marginLeft: window.innerWidth >= 768 ? "240px" : "0",
                             transition: "margin-left 0.3s ease",
+                            marginTop: "50px",
                         }}
                     >
                         <Outlet /> {/* 👈 This renders the active route (Dashboard, Tasks, etc.) */}

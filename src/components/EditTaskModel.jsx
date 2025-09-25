@@ -77,12 +77,23 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                         />
                     </Form.Group>
 
+                    <Form.Group className="mb-3" controlId="taskReminderDateTime">
+                        <Form.Label>Reminder Time</Form.Label>
+                        <Form.Control
+                            type="datetime-local"
+                            name="reminderTime"
+                            value={form.reminderTime || ''}
+                            onChange={handleChange}
+                            min={new Date().toISOString().slice(0, 16)}
+                        />
+                    </Form.Group>
+
                     <Form.Group className="mb-3" controlId="taskRemarks">
                         <Form.Label>Remarks</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
-                            placeholder="Optional notes"
+                            placeholder="Remarks Here..."
                             name="remarks"
                             value={form.remarks || ""}
                             onChange={handleChange}

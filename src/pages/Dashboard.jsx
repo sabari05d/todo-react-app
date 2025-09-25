@@ -50,6 +50,11 @@ const Dashboard = ({ theme, setTheme }) => {
         // (task) => task.dueDate <= today
     );
 
+    const upcomingTasks = tasks
+        .filter((task) => task.status === "pending" && task.dueDate >= today)
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        .slice(0, 5);
+
     // ✅ Mutations
     const updateTaskMutation = useMutation({
         mutationFn: updateTask,
@@ -89,110 +94,227 @@ const Dashboard = ({ theme, setTheme }) => {
 
     return (
         <>
-            <h1 className="fw-bold">Welcome, Your Grace!</h1>
-            <p className="">Your pending tasks up to today...</p>
+
 
             {/* Task Cards */}
             <Row>
-                {filteredTasks.length > 0 ? (
-                    filteredTasks.map((task) => (
-                        <Col md={4} key={task.id}>
-                            <Card className={`mb-3 shadow-sm text-capitalize ${theme === "Dark" ? "theme-dark" : "theme-light"}`}>
-                                <Card.Body>
-                                    <div className="d-flex justify-content-between">
-                                        {/* Left: Task details */}
-                                        <div className="d-flex ">
-                                            <div className="d-flex justify-content-center align-items-center me-2">
-                                                {/* Checkbox */}
-                                                {task.status === "finished" ? (
-                                                    <FaCheckCircle
-                                                        className="text-success fs-4"
-                                                        style={{ cursor: "pointer" }}
-                                                        onClick={() =>
-                                                            updateTaskMutation.mutate({ ...task, status: "pending" })
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <FaRegCircle
-                                                        className="text-secondary fs-4"
-                                                        style={{ cursor: "pointer" }}
-                                                        onClick={() =>
-                                                            updateTaskMutation.mutate({ ...task, status: "finished" })
-                                                        }
-                                                    />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <h6 className="mb-1">{task.title}</h6>
-                                                {task.remarks && (
-                                                    <p className="small  mb-2">{task.remarks}</p>
-                                                )}
-                                                <small className="">
-                                                    <Badge
-                                                        bg=""
-                                                        style={{
-                                                            backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
-                                                            color: "white" // ensure text is visible
-                                                        }}
-                                                    >
-                                                        {
-                                                            getCategory(task.categoryId)?.name || "Unknown"
-                                                        }
-                                                    </Badge>
-
-                                                    {task.dueDate && (
-                                                        <span className="ms-2">
-                                                            <FaClock
-                                                                style={{ color: "#6f42c1" }}
-                                                                className="me-1 mb-1"
+                {/* Pending and Today's Tasks */}
+                <Col md={8}>
+                    <h1 className="fw-bold mb-3">Welcome, Your Grace!</h1>
+                    {/* <p className="">Your pending tasks up to today...</p> */}
+                    <Row>
+                        {filteredTasks.length > 0 ? (
+                            filteredTasks.map((task) => (
+                                <Col md={6} key={task.id}>
+                                    <Card className={`mb-3 shadow-sm text-capitalize ${theme === "Dark" ? "theme-dark" : "theme-light"}`}>
+                                        <Card.Body>
+                                            <div className="d-flex justify-content-between">
+                                                {/* Left: Task details */}
+                                                <div className="d-flex ">
+                                                    <div className="d-flex justify-content-center align-items-center me-2">
+                                                        {/* Checkbox */}
+                                                        {task.status === "finished" ? (
+                                                            <FaCheckCircle
+                                                                className="text-success fs-4"
+                                                                style={{ cursor: "pointer" }}
+                                                                onClick={() =>
+                                                                    updateTaskMutation.mutate({ ...task, status: "pending" })
+                                                                }
                                                             />
-                                                            {task.dueDate}
-                                                            {task.dueTime && (
+                                                        ) : (
+                                                            <FaRegCircle
+                                                                className="text-secondary fs-4"
+                                                                style={{ cursor: "pointer" }}
+                                                                onClick={() =>
+                                                                    updateTaskMutation.mutate({ ...task, status: "finished" })
+                                                                }
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h6 className="mb-1">{task.title}</h6>
+                                                        {task.remarks && (
+                                                            <p className="small  mb-2">{task.remarks}</p>
+                                                        )}
+                                                        <small className="">
+                                                            <Badge
+                                                                bg=""
+                                                                style={{
+                                                                    backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
+                                                                    color: "white" // ensure text is visible
+                                                                }}
+                                                            >
+                                                                {
+                                                                    getCategory(task.categoryId)?.name || "Unknown"
+                                                                }
+                                                            </Badge>
+
+                                                            {task.dueDate && (
                                                                 <span className="ms-2">
-                                                                    {task.dueTime}
+                                                                    <FaClock
+                                                                        style={{ color: "#6f42c1" }}
+                                                                        className="me-1 mb-1"
+                                                                    />
+                                                                    {task.dueDate}
+                                                                    {task.dueTime && (
+                                                                        <span className="ms-2">
+                                                                            {task.dueTime}
+                                                                        </span>
+                                                                    )}
                                                                 </span>
                                                             )}
-                                                        </span>
-                                                    )}
 
 
-                                                </small>
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right: Menu + Checkbox + Status */}
+                                                <div className="d-flex flex-column align-items-end justify-content-between">
+                                                    <div>
+                                                        {/* 3 dots dropdown */}
+                                                        <Dropdown className="task-dropdown mb-0">
+                                                            <Dropdown.Toggle as={CustomToggle} id="dropdown-custom" />
+
+                                                            <Dropdown.Menu>
+                                                                <Dropdown.Item onClick={() => handleEdit(task)}>Edit Task</Dropdown.Item>
+                                                                <Dropdown.Item onClick={() => deleteTaskMutation.mutate(task.id)}>
+                                                                    Delete Task
+                                                                </Dropdown.Item>
+                                                            </Dropdown.Menu>
+                                                        </Dropdown>
+                                                    </div>
+
+
+
+                                                    <div>
+                                                        {/* Status Badge */}
+                                                        <Badge bg={statusColors[task.status] || "secondary"}>
+                                                            {task.status}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))
+                        ) : (
+                            <p className="text-start text-muted mb-0">No tasks for today.</p>
+                        )}
+                    </Row>
+                </Col>
 
-                                        {/* Right: Menu + Checkbox + Status */}
-                                        <div className="d-flex flex-column align-items-end justify-content-between">
-                                            <div>
-                                                {/* 3 dots dropdown */}
-                                                <Dropdown className="task-dropdown mb-0">
-                                                    <Dropdown.Toggle as={CustomToggle} id="dropdown-custom" />
+                {/* Upcoming Tasks */}
+                <Col md={4}>
+                    <h2 className="fw-bold mb-3">Upcoming Tasks</h2>
+                    <Card className='border-0 pb-0 '>
+                        <Card.Body>
+                            <Row>
+                                {upcomingTasks.length > 0 ? (
+                                    upcomingTasks.map((task) => (
+                                        <Col key={task.id}>
+                                            <Card className={`mb-3 shadow-sm text-capitalize ${theme === "Dark" ? "theme-dark" : "theme-light"}`}>
+                                                <Card.Body>
+                                                    <div className="d-flex justify-content-between">
+                                                        {/* Left: Task details */}
+                                                        <div className="d-flex ">
+                                                            <div className="d-flex justify-content-center align-items-center me-2">
+                                                                {/* Checkbox */}
+                                                                {task.status === "finished" ? (
+                                                                    <FaCheckCircle
+                                                                        className="text-success fs-4"
+                                                                        style={{ cursor: "pointer" }}
+                                                                        onClick={() =>
+                                                                            updateTaskMutation.mutate({ ...task, status: "pending" })
+                                                                        }
+                                                                    />
+                                                                ) : (
+                                                                    <FaRegCircle
+                                                                        className="text-secondary fs-4"
+                                                                        style={{ cursor: "pointer" }}
+                                                                        onClick={() =>
+                                                                            updateTaskMutation.mutate({ ...task, status: "finished" })
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <h6 className="mb-1">{task.title}</h6>
+                                                                {task.remarks && (
+                                                                    <p className="small  mb-2">{task.remarks}</p>
+                                                                )}
+                                                                <small className="">
+                                                                    <Badge
+                                                                        bg=""
+                                                                        style={{
+                                                                            backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
+                                                                            color: "white" // ensure text is visible
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            getCategory(task.categoryId)?.name || "Unknown"
+                                                                        }
+                                                                    </Badge>
 
-                                                    <Dropdown.Menu>
-                                                        <Dropdown.Item onClick={() => handleEdit(task)}>Edit Task</Dropdown.Item>
-                                                        <Dropdown.Item onClick={() => deleteTaskMutation.mutate(task.id)}>
-                                                            Delete Task
-                                                        </Dropdown.Item>
-                                                    </Dropdown.Menu>
-                                                </Dropdown>
-                                            </div>
+                                                                    {task.dueDate && (
+                                                                        <span className="ms-2">
+                                                                            <FaClock
+                                                                                style={{ color: "#6f42c1" }}
+                                                                                className="me-1 mb-1"
+                                                                            />
+                                                                            {task.dueDate}
+                                                                            {task.dueTime && (
+                                                                                <span className="ms-2">
+                                                                                    {task.dueTime}
+                                                                                </span>
+                                                                            )}
+                                                                        </span>
+                                                                    )}
+
+
+                                                                </small>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Right: Menu + Checkbox + Status */}
+                                                        <div className="d-flex flex-column align-items-end justify-content-between">
+                                                            <div>
+                                                                {/* 3 dots dropdown */}
+                                                                <Dropdown className="task-dropdown mb-0">
+                                                                    <Dropdown.Toggle as={CustomToggle} id="dropdown-custom" />
+
+                                                                    <Dropdown.Menu>
+                                                                        <Dropdown.Item onClick={() => handleEdit(task)}>Edit Task</Dropdown.Item>
+                                                                        <Dropdown.Item onClick={() => deleteTaskMutation.mutate(task.id)}>
+                                                                            Delete Task
+                                                                        </Dropdown.Item>
+                                                                    </Dropdown.Menu>
+                                                                </Dropdown>
+                                                            </div>
 
 
 
-                                            <div>
-                                                {/* Status Badge */}
-                                                <Badge bg={statusColors[task.status] || "secondary"}>
-                                                    {task.status}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))
-                ) : (
-                    <p className="text-center text-muted">No tasks for today.</p>
-                )}
+                                                            <div>
+                                                                {/* Status Badge */}
+                                                                <Badge bg={statusColors[task.status] || "secondary"}>
+                                                                    {task.status}
+                                                                </Badge>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    ))
+                                ) : (
+                                    <p className="text-start text-muted mb-0">No Upcoming Tasks.</p>
+                                )}
+                            </Row>
+                        </Card.Body>
+                    </Card>
+                </Col>
+
             </Row>
 
             <EditTaskModal

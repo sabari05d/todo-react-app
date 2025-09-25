@@ -37,7 +37,7 @@ const TaskReminder = ({ tasks }) => {
             tasks.forEach((task) => {
                 if (task.status === "completed") return; // skip finished tasks
 
-                const taskTime = new Date(`${task.dueDate}T${task.dueTime}:00`);
+                const taskTime = new Date(`${task.reminderTime}:00`);
                 const diff = taskTime - now;
 
                 if (diff > 0 && diff <= 5 * 60 * 1000) {

@@ -32,3 +32,10 @@
 }
 
 /* Theme changer */
+
+.recharts-surface:focus {
+  outline: none;
+}
+svg:focus {
+  outline: none;
+}

@@ -12,6 +12,7 @@ function AddTaskModal({ show, handleClose }) {
         remarks: "",
         dueDate: new Date().toISOString().split("T")[0], // pre-fill with today   
         dueTime: "",
+        reminderTime: "",
         categoryId: categories[0]?.id || "",
     });
 
@@ -25,6 +26,7 @@ function AddTaskModal({ show, handleClose }) {
                 remarks: "",
                 dueDate: "",
                 dueTime: "",
+                reminderTime: "",
                 categoryId: categories[0]?.id || "",
             });
         },
@@ -54,6 +56,7 @@ function AddTaskModal({ show, handleClose }) {
             ...formData,
             id: Date.now().toString(),
             status: "pending",
+            completedAt: "",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
@@ -116,12 +119,23 @@ function AddTaskModal({ show, handleClose }) {
                         />
                     </Form.Group>
 
+                    <Form.Group className="mb-3" controlId="taskReminderDateTime">
+                        <Form.Label>Reminder Time</Form.Label>
+                        <Form.Control
+                            type="datetime-local"
+                            name="reminderTime"
+                            value={formData.reminderTime}
+                            onChange={handleChange}
+                            min={new Date().toISOString().slice(0, 16)}
+                        />
+                    </Form.Group>
+
                     <Form.Group className="mb-3" controlId="taskRemarks">
                         <Form.Label>Remarks</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
-                            placeholder="Optional notes"
+                            placeholder="Remarks Here..."
                             name="remarks"
                             value={formData.remarks}
                             onChange={handleChange}

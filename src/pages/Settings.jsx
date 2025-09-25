@@ -9,6 +9,7 @@ import {
     deleteProfileImage,
 } from "../services/profileService";
 import dummyProfile from '../assets/images/dummy-profile.jpg';
+import { clearAllTasks } from "../services/taskService";
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState("personal");
@@ -44,6 +45,13 @@ const Settings = () => {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profileImage"] }),
     });
 
+    const handleClearTasks = async () => {
+        if (window.confirm("Are you sure you want to clear all tasks?")) {
+            await clearAllTasks();
+            alert("All tasks have been cleared!");
+            // Optionally, refresh your tasks state in parent component
+        }
+    };
 
     // Handlers
     const handleChange = (e) => {
@@ -94,6 +102,9 @@ const Settings = () => {
                             <Nav.Item className="d-none">
                                 <Nav.Link eventKey="general">General</Nav.Link>
                             </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="data">Manage Data</Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Card>
                 </Col>
@@ -102,6 +113,7 @@ const Settings = () => {
                 <Col md={9}>
                     <Card className="p-4">
                         <Form onSubmit={handleSubmit}>
+                            {/* Profile */}
                             {activeTab === "personal" && (
                                 <>
                                     {/* Profile Image Upload Section */}
@@ -197,9 +209,14 @@ const Settings = () => {
                                             onChange={handleChange}
                                         />
                                     </Form.Group>
+
+                                    <Button variant="primary" type="submit">
+                                        Save Changes
+                                    </Button>
                                 </>
                             )}
 
+                            {/* Theme */}
                             {activeTab === "general" && (
                                 <Form.Group className="mb-3">
                                     <Form.Label>Theme</Form.Label>
@@ -214,9 +231,24 @@ const Settings = () => {
                                 </Form.Group>
                             )}
 
-                            <Button variant="primary" type="submit">
-                                Save Changes
-                            </Button>
+                            {/* Data */}
+                            {activeTab === "data" && (
+                                <div className="p-3 border rounded shadow-sm bg-light">
+                                    <h5 className="mb-3">Manage Your Tasks</h5>
+                                    <p className="mb-2">
+                                        You can clear all your tasks from here. This will remove all tasks permanently.
+                                    </p>
+                                    <p className="text-warning fw-semibold fst-italic mb-3">
+                                        Note: This action cannot be undone!
+                                    </p>
+                                    <Button variant="danger" onClick={handleClearTasks}>
+                                        Clear All Tasks
+                                    </Button>
+                                </div>
+                            )}
+
+
+
                         </Form>
                     </Card>
                 </Col>

@@ -10,20 +10,22 @@ import {
 } from "../services/profileService";
 import dummyProfile from '../assets/images/dummy-profile.jpg';
 import { clearAllTasks } from "../services/taskService";
+import { useAppData } from "../context/AppDataContext";
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState("personal");
     const queryClient = useQueryClient();
 
-    // Fetch profile & image with React Query
-    const { data: formData = {}, isLoading } = useQuery({
-        queryKey: ["profile"],
-        queryFn: getProfile,
-    });
-    const { data: profileImage } = useQuery({
-        queryKey: ["profileImage"],
-        queryFn: getProfileImage,
-    });
+    const { profile } = useAppData();
+    const [formData, setFormData] = React.useState(profile || {});
+
+    React.useEffect(() => {
+        if (profile) {
+            setFormData(profile);
+        }
+    }, [profile]);
+
+    const userImage = formData?.profile_image || dummyProfile; // use from profile (or dummy)
 
 
     // Mutations
@@ -34,6 +36,7 @@ const Settings = () => {
             alert("Profile saved successfully!");
         },
     });
+
 
     const saveImageMutation = useMutation({
         mutationFn: saveProfileImage,
@@ -49,6 +52,7 @@ const Settings = () => {
         if (window.confirm("Are you sure you want to clear all tasks?")) {
             await clearAllTasks();
             alert("All tasks have been cleared!");
+            window.location.reload();
             // Optionally, refresh your tasks state in parent component
         }
     };
@@ -65,13 +69,10 @@ const Settings = () => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                saveImageMutation.mutate(reader.result);
-            };
-            reader.readAsDataURL(file);
+            saveImageMutation.mutate(file);
         }
     };
+
 
     const handleDeleteImage = () => {
         deleteImageMutation.mutate();
@@ -82,10 +83,9 @@ const Settings = () => {
         saveProfileMutation.mutate(formData);
     };
 
-    if (isLoading) return <p>Loading...</p>;
 
     return (
-        <div className="container my-4">
+        <div className="container-fluid my-4">
             <Row>
                 {/* Sidebar Tabs */}
                 <Col md={3} className="mb-3 mb-md-0">
@@ -120,7 +120,7 @@ const Settings = () => {
                                     <div className="d-flex align-items-center mb-4">
                                         <div className="me-3">
                                             <img
-                                                src={profileImage || dummyProfile}
+                                                src={userImage}
                                                 alt="Profile"
                                                 style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover" }}
                                             />
@@ -161,8 +161,9 @@ const Settings = () => {
                                                 <Form.Control
                                                     type="text"
                                                     name="firstName"
-                                                    value={formData.firstName}
+                                                    value={formData.firstName || ''}
                                                     onChange={handleChange}
+                                                    placeholder="First name"
                                                 />
                                             </Form.Group>
                                         </Col>
@@ -172,8 +173,10 @@ const Settings = () => {
                                                 <Form.Control
                                                     type="text"
                                                     name="lastName"
-                                                    value={formData.lastName}
+                                                    value={formData.lastName || ''}
                                                     onChange={handleChange}
+                                                    placeholder="Last name"
+
                                                 />
                                             </Form.Group>
                                         </Col>
@@ -184,8 +187,10 @@ const Settings = () => {
                                         <Form.Control
                                             type="email"
                                             name="email"
-                                            value={formData.email}
+                                            value={formData.email || ''}
                                             onChange={handleChange}
+                                            placeholder="Email"
+
                                         />
                                     </Form.Group>
 
@@ -194,8 +199,10 @@ const Settings = () => {
                                         <Form.Control
                                             type="text"
                                             name="mobile"
-                                            value={formData.mobile}
+                                            value={formData.mobile || ''}
                                             onChange={handleChange}
+                                            placeholder="Mobile Number"
+
                                         />
                                     </Form.Group>
 
@@ -205,8 +212,9 @@ const Settings = () => {
                                             as="textarea"
                                             rows={2}
                                             name="address"
-                                            value={formData.address}
+                                            value={formData.address || ''}
                                             onChange={handleChange}
+                                            placeholder="Address"
                                         />
                                     </Form.Group>
 

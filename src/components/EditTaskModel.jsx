@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import categories from "../data/categories.json";
+import { useAppData } from "../context/AppDataContext";
 
 
 const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
@@ -20,6 +20,16 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
         onUpdate(form); // ✅ call parent mutation
         onHide();
     };
+
+    const { categories } = useAppData();
+
+
+    // Update default categoryId when categories load
+    React.useEffect(() => {
+        if (categories.length > 0 && !form.category_id) {
+            setForm((prev) => ({ ...prev, category_id: categories[0].id }));
+        }
+    }, [categories]);
 
     return (
         <Modal show={show} onHide={onHide}>
@@ -43,8 +53,8 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                     <Form.Group className="mb-3" controlId="taskCategory">
                         <Form.Label>Category</Form.Label>
                         <Form.Select
-                            name="categoryId"
-                            value={form.categoryId || ""}
+                            name="category_id"
+                            value={form.category_id || ""}
                             onChange={handleChange}
                         >
                             {categories.map((cat) => (
@@ -59,8 +69,8 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                         <Form.Label>Due Date</Form.Label>
                         <Form.Control
                             type="date"
-                            name="dueDate"
-                            value={form.dueDate || ""}
+                            name="due_date"
+                            value={form.due_date || ""}
                             onChange={handleChange}
                             required
                             min={new Date().toISOString().split("T")[0]}
@@ -71,8 +81,8 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                         <Form.Label>Due Time</Form.Label>
                         <Form.Control
                             type="time"
-                            name="dueTime"
-                            value={form.dueTime || ""}
+                            name="due_time"
+                            value={form.due_time || ""}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -81,8 +91,8 @@ const EditTaskModal = ({ show, onHide, task, onUpdate }) => {
                         <Form.Label>Reminder Time</Form.Label>
                         <Form.Control
                             type="datetime-local"
-                            name="reminderTime"
-                            value={form.reminderTime || ''}
+                            name="reminder_time"
+                            value={form.reminder_time || ''}
                             onChange={handleChange}
                             min={new Date().toISOString().slice(0, 16)}
                         />

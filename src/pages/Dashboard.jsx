@@ -1,11 +1,11 @@
 import React from 'react'
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTasks, addTask, updateTask, deleteTask } from "../services/taskService";
-import categoriesData from "../data/categories.json";
 import EditTaskModal from '../components/EditTaskModel';
 import { Badge, Card, Col, Dropdown, Form, Row } from 'react-bootstrap';
 import { FaCheckCircle, FaClock, FaRegCircle } from 'react-icons/fa';
 import { BsThreeDots } from 'react-icons/bs';
+import { useAppData } from '../context/AppDataContext';
 
 
 // Colors for status
@@ -22,7 +22,6 @@ const Dashboard = ({ theme, setTheme }) => {
     const [showEdit, setShowEdit] = React.useState(false);
     const [currentTask, setCurrentTask] = React.useState(null);
     const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
-    const [categories, setCategories] = React.useState([]);
 
     // Handle mobile/desktop range
     React.useEffect(() => {
@@ -31,47 +30,41 @@ const Dashboard = ({ theme, setTheme }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // ✅ Categories (static JSON)
-    React.useEffect(() => {
-        setCategories(categoriesData);
-    }, []);
-
     // Fetch tasks via React Query
-    const { data: tasks = [], isLoading } = useQuery({
-        queryKey: ["tasks"],
-        queryFn: getTasks,
-    });
+    const { tasks, profile, categories } = useAppData();
+
 
     const today = new Date().toISOString().split("T")[0];
 
     // Filter pending + overdue tasks
-    const filteredTasks = tasks.filter(
-        (task) => task.status === "pending" && task.dueDate <= today
-        // (task) => task.dueDate <= today
-    );
+    const filteredTasks = tasks.filter(task => {
+        const taskDate = new Date(task.due_date).toISOString().split("T")[0];
+        return task.status === "pending" && taskDate <= today;
+    });
 
     const upcomingTasks = tasks
-        .filter((task) => task.status === "pending" && task.dueDate >= today)
-        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        .filter((task) => task.status === "pending" && task.due_date >= today)
+        .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
         .slice(0, 5);
 
     // ✅ Mutations
     const updateTaskMutation = useMutation({
         mutationFn: updateTask,
-        onSuccess: () => queryClient.invalidateQueries(["tasks"]),
+        onSuccess: (updatedTask) => {
+            queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+                oldTasks.map(t => t.id === updatedTask.id ? updatedTask : t)
+            );
+        },
     });
+
 
     const deleteTaskMutation = useMutation({
         mutationFn: deleteTask,
         onSuccess: () => queryClient.invalidateQueries(["tasks"]),
     });
 
-
-    if (isLoading) return <p>Loading...</p>;
-
     // Helpers
-    const getCategory = (id) => categories.find((c) => c.id === id.toString());
-
+    const getCategory = (id) => categories.find((c) => c.id == id);
 
     const handleEdit = (task) => {
         setCurrentTask(task);
@@ -140,29 +133,27 @@ const Dashboard = ({ theme, setTheme }) => {
                                                             <Badge
                                                                 bg=""
                                                                 style={{
-                                                                    backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
+                                                                    backgroundColor: getCategory(task.category_id)?.color || "#6c757d",
                                                                     color: "white" // ensure text is visible
                                                                 }}
                                                             >
                                                                 {
-                                                                    getCategory(task.categoryId)?.name || "Unknown"
+                                                                    getCategory(task.category_id)?.name || "Unknown"
                                                                 }
                                                             </Badge>
 
-                                                            {task.dueDate && (
+                                                            {task.due_date && (
                                                                 <span className="ms-2">
-                                                                    <FaClock
-                                                                        style={{ color: "#6f42c1" }}
-                                                                        className="me-1 mb-1"
-                                                                    />
-                                                                    {task.dueDate}
-                                                                    {task.dueTime && (
+                                                                    <FaClock style={{ color: "#6f42c1" }} className="me-1 mb-1" />
+                                                                    {new Date(task.due_date).toLocaleDateString()} {/* Formats YYYY-MM-DD */}
+                                                                    {task.due_time && (
                                                                         <span className="ms-2">
-                                                                            {task.dueTime}
+                                                                            {task.due_time.slice(0, 5)} {/* Show HH:MM */}
                                                                         </span>
                                                                     )}
                                                                 </span>
                                                             )}
+
 
 
                                                         </small>
@@ -248,29 +239,27 @@ const Dashboard = ({ theme, setTheme }) => {
                                                                     <Badge
                                                                         bg=""
                                                                         style={{
-                                                                            backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
+                                                                            backgroundColor: getCategory(task.category_id)?.color || "#6c757d",
                                                                             color: "white" // ensure text is visible
                                                                         }}
                                                                     >
                                                                         {
-                                                                            getCategory(task.categoryId)?.name || "Unknown"
+                                                                            getCategory(task.category_id)?.name || "Unknown"
                                                                         }
                                                                     </Badge>
 
-                                                                    {task.dueDate && (
+                                                                    {task.due_date && (
                                                                         <span className="ms-2">
-                                                                            <FaClock
-                                                                                style={{ color: "#6f42c1" }}
-                                                                                className="me-1 mb-1"
-                                                                            />
-                                                                            {task.dueDate}
-                                                                            {task.dueTime && (
+                                                                            <FaClock style={{ color: "#6f42c1" }} className="me-1 mb-1" />
+                                                                            {new Date(task.due_date).toLocaleDateString()} {/* Formats YYYY-MM-DD */}
+                                                                            {task.due_time && (
                                                                                 <span className="ms-2">
-                                                                                    {task.dueTime}
+                                                                                    {task.due_time.slice(0, 5)} {/* Show HH:MM */}
                                                                                 </span>
                                                                             )}
                                                                         </span>
                                                                     )}
+
 
 
                                                                 </small>

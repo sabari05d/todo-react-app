@@ -8,41 +8,31 @@ import {
 } from "recharts";
 import { getTasks } from "../services/taskService";
 import { VscGraph } from "react-icons/vsc";
-import categories from "../data/categories.json";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAppData } from "../context/AppDataContext";
 
-const categoryMap = categories.reduce((acc, c) => {
-    acc[c.id] = c;
-    return acc;
-}, {});
+
 
 const ReportsPage = () => {
-    // ✅ React Query: Fetch tasks
-    const { data: tasks = [], isLoading } = useQuery({
-        queryKey: ["tasks"],
-        queryFn: getTasks,
-    });
+    const { tasks, categories } = useAppData();
 
-    if (isLoading) {
-        return (
-            <div className="text-center mt-5">
-                <Spinner animation="border" variant="primary" />
-                <p>Loading reports...</p>
-            </div>
-        );
-    }
+    const categoryMap = categories.reduce((acc, c) => {
+        acc[c.id] = c;
+        return acc;
+    }, {});
 
     // --- Dynamic Data Processing ---
     const today = new Date().toISOString().split("T")[0];
 
     // Tasks due today
-    const todayTasks = tasks.filter(task => task.dueDate?.startsWith(today));
+    const todayTasks = tasks.filter(task => task.due_date?.startsWith(today));
 
-    // Completed today (use completedAt if exists, fallback to dueDate)
+    // Completed today (use completedAt if exists, fallback to due_date)
     const completedToday = tasks.filter(
         t => t.status === "finished" && t.completedAt?.startsWith(today)
     ).length;
 
-    // This Week’s Tasks (dueDate based)
+    // This Week’s Tasks (due_date based)
     const now = new Date();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
@@ -53,7 +43,7 @@ const ReportsPage = () => {
     endOfWeek.setHours(23, 59, 59, 999);
 
     const weekTasks = tasks.filter(task => {
-        const due = new Date(task.dueDate);
+        const due = new Date(task.due_date);
         return due >= startOfWeek && due <= endOfWeek;
     });
 
@@ -72,7 +62,7 @@ const ReportsPage = () => {
     // ✅ Tasks per day (dynamic)
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const barData = days.map((day, index) => {
-        const dayTasks = weekTasks.filter(t => new Date(t.dueDate).getDay() === index);
+        const dayTasks = weekTasks.filter(t => new Date(t.due_date).getDay() === index);
         const completedDay = dayTasks.filter(t => t.status === "finished").length;
         return { day, completed: completedDay };
     });
@@ -80,7 +70,7 @@ const ReportsPage = () => {
     // Category Reports (dynamic)
     const categoryReports = Object.values(
         tasks.reduce((acc, t) => {
-            const categoryName = categoryMap[t.categoryId]?.name || "Uncategorized";
+            const categoryName = categoryMap[t.category_id]?.name || "Uncategorized";
 
             if (!acc[categoryName]) {
                 acc[categoryName] = {
@@ -100,7 +90,7 @@ const ReportsPage = () => {
 
 
     return (
-        <div className="container">
+        <div className="container-fluid">
             <h2 className="mb-4"><VscGraph /> Reports & Progress</h2>
 
             {/* Summary Cards */}
@@ -120,7 +110,7 @@ const ReportsPage = () => {
                     </Card>
                 </Col>
 
-                <Col md={6}>
+                <Col md={6} className="mt-3 mt-md-0">
                     <Card className="shadow-sm border-0">
                         <Card.Body>
                             <Card.Title>This Week’s Progress</Card.Title>

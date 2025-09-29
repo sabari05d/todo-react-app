@@ -1,6 +1,5 @@
 import React, { forwardRef } from "react";
 import { Badge, Card, Dropdown, Row, Col, Form } from "react-bootstrap";
-import categoriesData from "../data/categories.json";
 import { FaCheckCircle, FaClock, FaRegCircle } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import EditTaskModal from "../components/EditTaskModel";
@@ -9,6 +8,10 @@ import { getTasks, addTask, updateTask, deleteTask } from "../services/taskServi
 import { IoCalendarNumber } from "react-icons/io5";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import { getCategories } from "../services/categories";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAppData } from "../context/AppDataContext";
+
 
 
 // Colors for status
@@ -32,7 +35,6 @@ const Tasks = () => {
     const queryClient = useQueryClient();
 
     const [selectedDate, setSelectedDate] = React.useState(new Date());
-    const [categories, setCategories] = React.useState([]);
     // Edit modal
     const [showEdit, setShowEdit] = React.useState(false);
     const [currentTask, setCurrentTask] = React.useState(null);
@@ -47,30 +49,24 @@ const Tasks = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // ✅ Categories (static JSON)
-    React.useEffect(() => {
-        setCategories(categoriesData);
-    }, []);
-
-    // ✅ React Query: Fetch tasks
-    const { data: tasks = [], isLoading } = useQuery({
-        queryKey: ["tasks"],
-        queryFn: getTasks,
-    });
+    // Fetch tasks via React Query
+    const { tasks, profile, categories } = useAppData();
 
     // ✅ Mutations
     const updateTaskMutation = useMutation({
         mutationFn: updateTask,
-        onSuccess: () => queryClient.invalidateQueries(["tasks"]),
+        onSuccess: (updatedTask) => {
+            queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+                oldTasks.map(t => t.id === updatedTask.id ? updatedTask : t)
+            );
+        },
     });
+
 
     const deleteTaskMutation = useMutation({
         mutationFn: deleteTask,
         onSuccess: () => queryClient.invalidateQueries(["tasks"]),
     });
-
-    if (isLoading) return <p>Loading...</p>;
-
 
 
 
@@ -93,11 +89,14 @@ const Tasks = () => {
         return arr;
     };
 
-    // Helpers
-    const getCategory = (id) => categories.find((c) => c.id === id.toString());
-    const filteredTasks = tasks.filter(
-        (task) => task.dueDate === selectedDate.toISOString().split("T")[0]
-    );
+
+
+    const filteredTasks = tasks.filter((task) => {
+        const taskDate = new Date(task.due_date).toISOString().split("T")[0];
+        const selected = selectedDate.toISOString().split("T")[0];
+        return taskDate === selected;
+    });
+
 
     const handleEdit = (task) => {
         setCurrentTask(task);
@@ -119,11 +118,16 @@ const Tasks = () => {
 
 
 
+
+    // Helper to get category object by id
+    const getCategory = (id) => categories.find((c) => c.id === id);
+    console.log(getCategory);
+
     return (
         <div className="">
             <div className="d-flex">
                 <div className="justify-content-end">
-                    <div className="text-end mb-3" style={{cursor: 'pointer'}}>
+                    <div className="text-end mb-3" style={{ cursor: 'pointer' }}>
                         <DatePicker
                             selected={selectedDate}
                             onChange={(date) => setSelectedDate(date)}
@@ -205,12 +209,12 @@ const Tasks = () => {
                                                     <Badge
                                                         bg=""
                                                         style={{
-                                                            backgroundColor: getCategory(task.categoryId)?.color || "#6c757d",
+                                                            backgroundColor: getCategory(task.category_id)?.color || "#6c757d",
                                                             color: "white" // ensure text is visible
                                                         }}
                                                     >
                                                         {
-                                                            getCategory(task.categoryId)?.name || "Unknown"
+                                                            getCategory(task.category_id)?.name || "Unknown"
                                                         }
                                                     </Badge>
 

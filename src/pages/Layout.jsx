@@ -6,24 +6,17 @@ import { CgMenuLeft } from "react-icons/cg";
 import { Modal, Button } from "react-bootstrap";
 import { FaBell, FaPlus } from 'react-icons/fa';
 import AddTaskModal from '../components/AddTaskModal';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProfile, getProfileImage } from "../services/profileService";
 import dummyProfile from '../assets/images/dummy-profile.jpg';
+import { useAppData } from '../context/AppDataContext';
 
 function Layout({ theme, setTheme }) {
 
-    const { data: profile } = useQuery({
-        queryKey: ["profile"],
-        queryFn: getProfile,
-    });
+    const { profile } = useAppData();
 
-    const { data: profileImage } = useQuery({
-        queryKey: ["profileImage"],
-        queryFn: getProfileImage,
-    });
-
-    const userName = profile?.firstName || "User";
-    const userImage = profileImage || dummyProfile;
+    const userName = profile?.name || "User";
+    const userImage = profile?.profile_image || dummyProfile; // use from profile (or dummy)
 
     const [show, setShow] = React.useState(false);
 
@@ -31,23 +24,6 @@ function Layout({ theme, setTheme }) {
     const handleShow = () => setShow(true);
 
     const [showTaskModal, setShowTaskModal] = React.useState(false);
-
-    const [tasks, setTasks] = React.useState([]);
-
-    // Load tasks from localStorage when Layout mounts
-    React.useEffect(() => {
-        const storedTasks = localStorage.getItem("tasks");
-        if (storedTasks) {
-            setTasks(JSON.parse(storedTasks));
-        }
-    }, [showTaskModal]);
-
-    const handleSaveTask = (task) => {
-        const updatedTasks = [...tasks, task];
-        setTasks(updatedTasks);
-        localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-    };
-
 
 
 
@@ -71,7 +47,7 @@ function Layout({ theme, setTheme }) {
                         <Nav.Link as={Link} onClick={handleClose} to="/dashboard">Dashboard</Nav.Link>
                         <Nav.Link as={Link} onClick={handleClose} to="/tasks">Tasks</Nav.Link>
                         <Nav.Link as={Link} onClick={handleClose} to="/reports">Reports</Nav.Link>
-                        <Nav.Link as={Link} onClick={handleClose} to="/settings">Settings</Nav.Link>
+                        <Nav.Link as={Link} onClick={handleClose} to="/profile">Profile</Nav.Link>
                     </Nav>
                 </div>
 
@@ -91,13 +67,13 @@ function Layout({ theme, setTheme }) {
                             </span>
                         </Navbar.Brand>
                         {/* User Info */}
-                        <Nav.Link as={Link} onClick={handleClose} to="/settings">
+                        <Nav.Link as={Link} onClick={handleClose} to="/profile">
                             <div className="ms-auto d-flex align-items-center">
 
                                 {/* Bell Icon */}
                                 {/* <span className="me-4 text-secondary">
-                                <FaBell />
-                            </span> */}
+                                    <FaBell />
+                                </span> */}
 
                                 {/* Avatar */}
                                 <img
@@ -130,7 +106,7 @@ function Layout({ theme, setTheme }) {
                                 <Nav.Link as={Link} onClick={handleClose} to="/dashboard">Dashboard</Nav.Link>
                                 <Nav.Link as={Link} onClick={handleClose} to="/tasks">Tasks</Nav.Link>
                                 <Nav.Link as={Link} onClick={handleClose} to="/reports">Reports</Nav.Link>
-                                <Nav.Link as={Link} onClick={handleClose} to="/settings">Settings</Nav.Link>
+                                <Nav.Link as={Link} onClick={handleClose} to="/profile">Profile</Nav.Link>
                             </Nav>
                         </Offcanvas.Body>
                     </Offcanvas>
@@ -165,11 +141,11 @@ function Layout({ theme, setTheme }) {
             </div >
 
             {/* Add Task Modal */}
-            < AddTaskModal
+            <AddTaskModal
                 show={showTaskModal}
                 handleClose={() => setShowTaskModal(false)}
-                handleSave={handleSaveTask}
             />
+
         </>
     );
 }

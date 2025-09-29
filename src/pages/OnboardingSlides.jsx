@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import logoImage from '../../public/icon-512x512.png';
 import { Image } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export const OnboardingSlides = ({ onFinish }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const totalSlides = 3;
     const [isChecked, setIsChecked] = useState(false);
+    const navigate = useNavigate();
 
     const nextSlide = () => {
         if (currentSlide < totalSlides - 1) setCurrentSlide(currentSlide + 1);
@@ -22,6 +24,7 @@ export const OnboardingSlides = ({ onFinish }) => {
         }
         localStorage.setItem("onboardingCompleted", "true");
         if (onFinish) onFinish();
+        navigate("/sign-up");
     };
 
     return (

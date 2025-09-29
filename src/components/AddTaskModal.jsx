@@ -1,33 +1,44 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addTask } from "../services/taskService";
-import categories from "../data/categories.json";
+import { useAppData } from "../context/AppDataContext";
 
 function AddTaskModal({ show, handleClose }) {
+    const { categories } = useAppData();
     const queryClient = useQueryClient();
+
 
     const [formData, setFormData] = React.useState({
         title: "",
         remarks: "",
-        dueDate: new Date().toISOString().split("T")[0], // pre-fill with today   
-        dueTime: "",
-        reminderTime: "",
-        categoryId: categories[0]?.id || "",
+        due_date: new Date().toISOString().split("T")[0], // pre-fill with today   
+        due_time: "",
+        reminder_time: "",
+        category_id: "", // will set default below
     });
+
+    // Update default category_id when categories load
+    React.useEffect(() => {
+        if (categories.length > 0 && !formData.category_id) {
+            setFormData((prev) => ({ ...prev, category_id: categories[0].id }));
+        }
+    }, [categories]);
+
+
 
     const addTaskMutation = useMutation({
         mutationFn: addTask,
         onSuccess: () => {
-            queryClient.invalidateQueries(["tasks"]); // refresh tasks everywhere
-            handleClose();
+            queryClient.invalidateQueries(["tasks"]);
+            handleClose(); // ✅ close modal
             setFormData({
                 title: "",
                 remarks: "",
-                dueDate: "",
-                dueTime: "",
-                reminderTime: "",
-                categoryId: categories[0]?.id || "",
+                due_date: "",
+                due_time: "",
+                reminder_time: "",
+                category_id: categories[0]?.id || "",
             });
         },
     });
@@ -39,29 +50,39 @@ function AddTaskModal({ show, handleClose }) {
         });
     };
 
-    const handleSubmit = () => {
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+    const handleSubmit = () => {
+        if (isSubmitting) return; // prevent double clicks
+        setIsSubmitting(true);
 
         if (!formData.title.trim()) {
             alert("Task title is required");
+            setIsSubmitting(false);
             return;
         }
-        if (!formData.dueDate) {
+        if (!formData.due_date) {
             alert("Due date is required");
+            setIsSubmitting(false);
             return;
         }
-
 
         const newTask = {
             ...formData,
             id: Date.now().toString(),
             status: "pending",
-            completedAt: "",
+            completed_at: "",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
-        addTaskMutation.mutate(newTask);
+
+        addTaskMutation.mutate(newTask, {
+            onSettled: () => {
+                setIsSubmitting(false); // re-enable after success or error
+            },
+        });
     };
+
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -85,8 +106,8 @@ function AddTaskModal({ show, handleClose }) {
                     <Form.Group className="mb-3" controlId="taskCategory">
                         <Form.Label>Category</Form.Label>
                         <Form.Select
-                            name="categoryId"
-                            value={formData.categoryId}
+                            name="category_id"
+                            value={formData.category_id}
                             onChange={handleChange}
                         >
                             {categories.map((cat) => (
@@ -101,8 +122,8 @@ function AddTaskModal({ show, handleClose }) {
                         <Form.Label>Due Date</Form.Label>
                         <Form.Control
                             type="date"
-                            name="dueDate"
-                            value={formData.dueDate}
+                            name="due_date"
+                            value={formData.due_date}
                             onChange={handleChange}
                             required
                             min={new Date().toISOString().split("T")[0]}
@@ -113,8 +134,8 @@ function AddTaskModal({ show, handleClose }) {
                         <Form.Label>Due Time</Form.Label>
                         <Form.Control
                             type="time"
-                            name="dueTime"
-                            value={formData.dueTime}
+                            name="due_time"
+                            value={formData.due_time}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -123,8 +144,8 @@ function AddTaskModal({ show, handleClose }) {
                         <Form.Label>Reminder Time</Form.Label>
                         <Form.Control
                             type="datetime-local"
-                            name="reminderTime"
-                            value={formData.reminderTime}
+                            name="reminder_time"
+                            value={formData.reminder_time}
                             onChange={handleChange}
                             min={new Date().toISOString().slice(0, 16)}
                         />
@@ -150,9 +171,9 @@ function AddTaskModal({ show, handleClose }) {
                 <Button
                     variant="success"
                     onClick={handleSubmit}
-                    disabled={addTaskMutation.isLoading}
+                    disabled={addTaskMutation.isLoading || isSubmitting}
                 >
-                    {addTaskMutation.isLoading ? "Saving..." : "Save Task"}
+                    {addTaskMutation.isLoading || isSubmitting ? "Saving..." : "Save Task"}
                 </Button>
             </Modal.Footer>
         </Modal>
